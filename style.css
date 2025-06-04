@@ -14,7 +14,7 @@ body {
 }
 
 .container {
-  max-width: 900px;         /* Proširili smo malo širinu za bolju preglednost */
+  max-width: 900px;         /* Širina kontejnera proširena za bolju preglednost */
   margin: 50px auto;
   background-color: #ffffff;
   padding: 20px 30px;
@@ -60,7 +60,7 @@ h1 {
   text-decoration: underline;
 }
 
-/* Forma */
+/* Forma za unos */
 .form-group {
   margin-bottom: 15px;
 }
@@ -96,60 +96,68 @@ input[type='date']:focus {
 #machineTable {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  margin-top: 30px;
   font-size: 0.95rem;
+  /* Ravni vrh i dno za bolji dojam */
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Zaglavlje tablice */
 #machineTable thead {
   background-color: #007acc;
-  color: #ffffff;
 }
 
 #machineTable th {
   padding: 12px 10px;
-  text-align: left;      /* Tekst poravnat lijevo jer su nazivi stupaca često duži */
+  text-align: left;
+  color: #ffffff;
   font-weight: bold;
-  border-bottom: 2px solid #005da1;
 }
 
-/* Tijelo tablice */
-#machineTable tbody tr {
-  background-color: #ffffff;
-  transition: background-color 0.2s ease;
-}
+/*                                                                                            */
+/* ======================================================================================= */
+/* Tijelo tablice (svaki red)                                                              */
+/* ======================================================================================= */
+/*                                                                                            */
 
-/* Zebra efekat (svaki drugi red malo tamniji) */
+/* Svaki drugi red (zebra efekt) */
 #machineTable tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-/* Kad mišem prijeđete preko reda */
+/* Hover efekt na redove */
 #machineTable tbody tr:hover {
   background-color: #e8f4fd;
 }
 
-/* Ćelije u tijelu */
+/* Ćelije u tijelu tablice */
 #machineTable td {
   padding: 10px;
   border-bottom: 1px solid #dddddd;
+  color: #333333;
 }
 
-/* Akcijski gumbići (Uredi, Obriši) */
-.edit-btn, .delete-btn {
-  padding: 4px 8px;
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin: 0 2px;
-  transition: opacity 0.2s ease;
+/* Kada nema podataka, tablica se sakrije */
+#machineTable[hidden] {
+  display: none;
 }
+
+/* ===================== */
+/* STILOVI ZA GUMBIĆE    */
+/* ===================== */
 
 /* Gumb Uredi */
 .edit-btn {
   background-color: #ffc107;
   color: #000;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 .edit-btn:hover {
   background-color: #e0a800;
@@ -160,31 +168,22 @@ input[type='date']:focus {
 .delete-btn {
   background-color: #dc3545;
   color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 .delete-btn:hover {
   background-color: #c82333;
   opacity: 0.9;
 }
 
-/* Ako nema podataka, sakrij tablicu */
-#machineTable[hidden] {
-  display: none;
-}
-
 /* ===================== */
-/* STILOVI ZA TEXT INPUT */
-/* ===================== */
-
-input::placeholder {
-  color: #aaa;
-}
-
-/* ===================== */
-/* OPĆI STILOVI BODOVI */
+/* OPĆI STILOVI BODOVI   */
 /* ===================== */
 
 button {
-  display: inline-block;
-  /* Ostatak pravila primjenjuje se samo na #saveMachineBtn */
   font-family: inherit;
 }

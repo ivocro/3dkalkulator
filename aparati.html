@@ -3,41 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>aparati</title>
+  <title>Upravljanje aparatima</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    /* Dodatno podešavanje za tablicu uređivanja */
-    .edit-btn, .delete-btn {
-      padding: 4px 8px;
-      font-size: 0.9rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      margin: 0 2px;
-    }
-    .edit-btn {
-      background-color: #ffc107;
-      color: #000;
-    }
-    .edit-btn:hover {
-      background-color: #e0a800;
-    }
-    .delete-btn {
-      background-color: #dc3545;
-      color: #fff;
-    }
-    .delete-btn:hover {
-      background-color: #c82333;
-    }
-    .back-link {
-      display: inline-block;
-      margin-bottom: 15px;
-      color: #007acc;
-    }
-    .back-link:hover {
-      text-decoration: underline;
-    }
-  </style>
 
   <!-- 1) Firebase App (core) SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -133,9 +100,8 @@
       appId: "1:12370063576:web:4b669228036e1f929567ad"
     };
 
-    // Inicijaliziraj Firebase
+    // Inicijaliziraj Firebase i Firestore
     firebase.initializeApp(firebaseConfig);
-    // Inicijaliziraj Firestore
     const db = firebase.firestore();
 
     // ======= 2) Selektiraj DOM elemente =======
@@ -151,8 +117,8 @@
     const powerInput       = document.getElementById('powerRating');
     const energyInput      = document.getElementById('energyCost');
 
-    const table      = document.getElementById('machineTable');
-    const tbody      = table.querySelector('tbody');
+    const table = document.getElementById('machineTable');
+    const tbody = table.querySelector('tbody');
 
     // ======= 3) Funkcija za iscrtavanje tablice iz Firestore podataka =======
     function renderTable(machines) {
@@ -163,11 +129,11 @@
         const id = doc.id;
 
         // Izračun troška rada po satu:
-        //  amortizacija_po_satu = (nabavnaVrijednost + ukupniTrošakOdržavanja) / radniVijek_u_satima
+        // amortizacija_po_satu = (nabavnaVrijednost + ukupniTrošakOdržavanja) / radniVijek_u_satima
         const amortizacijaPoSatu = (m.price + m.maintenance) / m.lifetime;
-        //  trošakEnergije_po_satu = snaga_u_kW * cijenaEnergije_€/kWh
+        // trošakEnergije_po_satu = snaga_u_kW * cijenaEnergije_€/kWh
         const trosakEnergijePoSatu = m.power * m.energyCost;
-        //  cijenaRada_po_satu = amortizacija_po_satu + trosakEnergije_po_satu
+        // cijenaRada_po_satu = amortizacija_po_satu + trosakEnergije_po_satu
         const cijenaRadaPoSatu = amortizacijaPoSatu + trosakEnergijePoSatu;
 
         const row = tbody.insertRow();
@@ -191,7 +157,7 @@
       attachActionListeners();
     }
 
-    // ======= 4) Dodeli event listenere za Edit i Delete gumbiće =======
+    // ======= 4) Dodaj event listenere na gumbe “Uredi” i “Obriši” =======
     function attachActionListeners() {
       document.querySelectorAll('.edit-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -207,7 +173,7 @@
       });
     }
 
-    // ======= 5) Uđi u mod uređivanja (popuni formu podacima iz Firestore) =======
+    // ======= 5) Popuni formu za uređivanje =======
     async function enterEditMode(docId) {
       const docSnap = await db.collection('machines').doc(docId).get();
       if (docSnap.exists) {
@@ -225,7 +191,7 @@
       }
     }
 
-    // ======= 6) Izađi iz moda uređivanja (očisti formu) =======
+    // ======= 6) Resetiraj formu kad izađemo iz mode `edit` =======
     function exitEditMode() {
       form.reset();
       editIdInput.value = '';
@@ -242,25 +208,26 @@
       await db.collection('machines').doc(docId).update(machineData);
     }
 
-    // ======= 9) Brisanje aparata iz Firestore =======
+    // ======= 9) Brisanje aparata iz Firestorea =======
     async function deleteMachine(docId) {
       await db.collection('machines').doc(docId).delete();
     }
 
-    // ======= 10) Učitaj sve aparate iz Firestore i iscrtaj tablicu =======
+    // ======= 10) Učitaj sve aparate i prikaži tablicu =======
     function loadMachines() {
-      // “onSnapshot” automatski prati promjene i re-rendera tablicu
+      // “onSnapshot” prati promjene u Firestore-i i odmah osvježava listu
       db.collection('machines')
-        .orderBy('name') // sort po imenu
+        .orderBy('name')
         .onSnapshot(snapshot => {
           renderTable(snapshot.docs);
           exitEditMode();
         });
     }
 
-    // ======= 11) Event listener za formu (dodaj/uredi) =======
+    // ======= 11) Prilikom slanja forme, izračunaj i spremi “cijenaRada” =======
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const name        = nameInput.value.trim();
       const price       = parseFloat(priceInput.value) || 0;
       const date        = dateInput.value;
@@ -269,21 +236,36 @@
       const power       = parseFloat(powerInput.value) || 0;
       const energyCost  = parseFloat(energyInput.value) || 0;
 
-      const machineData = { name, price, date, lifetime, maintenance, power, energyCost };
-      const docId = editIdInput.value;
+      // Izračun “cijena rada” prije nego što spremimo u Firestore
+      const amortizacijaPoSatu      = (price + maintenance) / lifetime;
+      const trosakEnergijePoSatu    = power * energyCost;
+      const cijenaRadaPoSatu        = amortizacijaPoSatu + trosakEnergijePoSatu;
 
+      // Spremamo u bazu i taj izračun
+      const machineData = {
+        name,
+        price,
+        date,
+        lifetime,
+        maintenance,
+        power,
+        energyCost,
+        cijenaRada: parseFloat(cijenaRadaPoSatu.toFixed(2))
+      };
+
+      const docId = editIdInput.value;
       if (docId) {
-        // režim uređivanja
+        // uređivanje
         await updateMachine(docId, machineData);
       } else {
-        // režim dodavanja
+        // dodavanje
         await addMachine(machineData);
       }
       exitEditMode();
-      // “onSnapshot” automatski poziva renderTable
+      // “onSnapshot” će automatski osvježiti tablicu
     });
 
-    // ======= 12) Po učitavanju stranice startaj loadMachines =======
+    // ======= 12) Na učitavanje stranice, prikreni loadMachines =======
     document.addEventListener('DOMContentLoaded', loadMachines);
   </script>
 </body>
