@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "name": "Bambu Lab A1",
+    "price": 1499.99,
+    "date": "2024-10-15",
+    "lifetime": 5000,
+    "maintenance": 500.00,
+    "power": 0.10,
+    "energyCost": 0.15
+  },
+  {
+    "name": "XYZ Printer X100",
+    "price": 900.00,
+    "date": "2023-05-20",
+    "lifetime": 3000,
+    "maintenance": 300.00,
+    "power": 0.08,
+    "energyCost": 0.15
+  }
+]
