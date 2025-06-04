@@ -114,6 +114,7 @@
           <th>Trošak održavanja (EUR)</th>
           <th>Snaga (kW)</th>
           <th>Cijena energ. (€/kWh)</th>
+          <th>Cijena rada (€/sat)</th>
           <th>Akcije</th>
         </tr>
       </thead>
@@ -160,6 +161,15 @@
       machines.forEach(doc => {
         const m = doc.data();
         const id = doc.id;
+
+        // Izračun troška rada po satu:
+        //  amortizacija_po_satu = (nabavnaVrijednost + ukupniTrošakOdržavanja) / radniVijek_u_satima
+        const amortizacijaPoSatu = (m.price + m.maintenance) / m.lifetime;
+        //  trošakEnergije_po_satu = snaga_u_kW * cijenaEnergije_€/kWh
+        const trosakEnergijePoSatu = m.power * m.energyCost;
+        //  cijenaRada_po_satu = amortizacija_po_satu + trosakEnergije_po_satu
+        const cijenaRadaPoSatu = amortizacijaPoSatu + trosakEnergijePoSatu;
+
         const row = tbody.insertRow();
         row.innerHTML = `
           <td>${m.name}</td>
@@ -169,6 +179,7 @@
           <td>${m.maintenance.toFixed(2)}</td>
           <td>${m.power.toFixed(2)}</td>
           <td>${m.energyCost.toFixed(2)}</td>
+          <td>${cijenaRadaPoSatu.toFixed(2)}</td>
           <td>
             <button class="edit-btn" data-id="${id}">Uredi</button>
             <button class="delete-btn" data-id="${id}">Obriši</button>
@@ -238,9 +249,9 @@
 
     // ======= 10) Učitaj sve aparate iz Firestore i iscrtaj tablicu =======
     function loadMachines() {
-      // “onSnapshot” automatski prati promjene
+      // “onSnapshot” automatski prati promjene i re-rendera tablicu
       db.collection('machines')
-        .orderBy('name')
+        .orderBy('name') // sort po imenu
         .onSnapshot(snapshot => {
           renderTable(snapshot.docs);
           exitEditMode();
@@ -269,7 +280,7 @@
         await addMachine(machineData);
       }
       exitEditMode();
-      // “onSnapshot” će automatski pozvati renderTable
+      // “onSnapshot” automatski poziva renderTable
     });
 
     // ======= 12) Po učitavanju stranice startaj loadMachines =======
