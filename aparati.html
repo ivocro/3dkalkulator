@@ -223,36 +223,24 @@
 
     // ======= 7) Dodavanje novog aparata u Firestore =======
     async function addMachine(machineData) {
-      try {
-        await db.collection('machines').add(machineData);
-      } catch (err) {
-        console.error('Greška pri dodavanju aparata:', err);
-      }
+      await db.collection('machines').add(machineData);
     }
 
     // ======= 8) Ažuriranje postojećeg aparata =======
     async function updateMachine(docId, machineData) {
-      try {
-        await db.collection('machines').doc(docId).update(machineData);
-      } catch (err) {
-        console.error('Greška pri ažuriranju aparata:', err);
-      }
+      await db.collection('machines').doc(docId).update(machineData);
     }
 
     // ======= 9) Brisanje aparata iz Firestore =======
     async function deleteMachine(docId) {
-      try {
-        await db.collection('machines').doc(docId).delete();
-      } catch (err) {
-        console.error('Greška pri brisanju aparata:', err);
-      }
+      await db.collection('machines').doc(docId).delete();
     }
 
     // ======= 10) Učitaj sve aparate iz Firestore i iscrtaj tablicu =======
     function loadMachines() {
-      // “onSnapshot” automatski prati promjene u kolekciji i re-rendera tablicu
+      // “onSnapshot” automatski prati promjene
       db.collection('machines')
-        .orderBy('name') // po imenu abecedno
+        .orderBy('name')
         .onSnapshot(snapshot => {
           renderTable(snapshot.docs);
           exitEditMode();
