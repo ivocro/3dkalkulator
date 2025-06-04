@@ -54,7 +54,7 @@
     </p>
 
     <form id="machine-form">
-      <!-- Polje za praćenje indeksa prilikom uređivanja -->
+      <!-- Polje za praćenje ID-a prilikom uređivanja -->
       <input type="hidden" id="editId" value="" />
 
       <!-- Naziv aparata -->
@@ -123,15 +123,14 @@
 
   <script>
     // ======= 1) Firebase konfiguracija =======
-    //  Ovaj dio zamijeni s vlastitim konfiguracijskim podacima
-const firebaseConfig = {
-  apiKey: "AIzaSyCIq-37qCC2YkdqTDfrB1vz9VbOtt8hvVM",
-  authDomain: "modelico-kalkulator.firebaseapp.com",
-  projectId: "modelico-kalkulator",
-  storageBucket: "modelico-kalkulator.firebasestorage.app",
-  messagingSenderId: "12370063576",
-  appId: "1:12370063576:web:4b669228036e1f929567ad"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyCIq-37qCC2YkdqTDfrB1vz9VbOtt8hvVM",
+      authDomain: "modelico-kalkulator.firebaseapp.com",
+      projectId: "modelico-kalkulator",
+      storageBucket: "modelico-kalkulator.firebasestorage.app",
+      messagingSenderId: "12370063576",
+      appId: "1:12370063576:web:4b669228036e1f929567ad"
+    };
 
     // Inicijaliziraj Firebase
     firebase.initializeApp(firebaseConfig);

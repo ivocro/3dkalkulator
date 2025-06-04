@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const shippingCostResult    = document.getElementById('shippingCostResult');
   const finalTotalPrice       = document.getElementById('finalTotalPrice');
 
-  // Diskuska za „sastrane” (razrede popusta)
+  // Diskuska za „sastrane” (razredi popusta)
   const addTierBtn    = document.getElementById('addTierBtn');
   const discountTable = document.getElementById('discountTable').getElementsByTagName('tbody')[0];
 
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tiers.push({ min: minVal, max: maxVal, pct: pctVal });
       }
     });
-    // Sortiraj po min vrijednosti (ako je potrebno)
+    // Sortiraj po min vrijednosti
     tiers.sort((a, b) => a.min - b.min);
     return tiers;
   }
