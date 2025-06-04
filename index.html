@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>modelico kalkulator</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Chart.js + Datalabels -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>modelico kalkulator</h1>
+
+    <!-- LINK NA UPRAVLJANJE APARATIMA -->
+    <p style="text-align: right; margin-bottom: 20px;">
+      <a href="aparati.html">Upravljaj aparatima</a>
+    </p>
+
+    <form id="price-form">
+      <!-- ... (svi postojeći elementi forme kao dosad) ... -->
+
+      <!-- Količina komada -->
+      <div class="form-group">
+        <label for="quantity">Količina komada:</label>
+        <input type="number" id="quantity" min="1" step="1" value="1" required />
+      </div>
+
+      <!-- Težina otiska po komadu (g) -->
+      <div class="form-group">
+        <label for="weightGrams">Težina otiska po komadu (u gramima):</label>
+        <input type="number" id="weightGrams" min="0" step="0.1" required />
+      </div>
+
+      <!-- Cijena materijala (€/kg) -->
+      <div class="form-group">
+        <label for="materialCost">Cijena materijala (€/kg):</label>
+        <input type="number" id="materialCost" min="0" step="0.01" required />
+      </div>
+
+      <!-- Vrijeme printanja po komadu (min) -->
+      <div class="form-group">
+        <label for="printTime">Vrijeme printanja po komadu (u minutama):</label>
+        <input type="number" id="printTime" min="0" step="1" required />
+      </div>
+
+      <!-- Cijena rada 3D printera (€/sat) -->
+      <div class="form-group">
+        <label for="machineCostPerHour">Cijena rada 3D printera (€/sat):</label>
+        <input
+          type="number"
+          id="machineCostPerHour"
+          min="0"
+          step="0.01"
+          placeholder="npr. struja + amortizacija"
+          required
+        />
+      </div>
+
+      <!-- Vrijeme ručnog rada po komadu (min) -->
+      <div class="form-group">
+        <label for="laborTime">Vrijeme ručnog rada po komadu (u minutama):</label>
+        <input type="number" id="laborTime" min="0" step="1" required />
+      </div>
+
+      <!-- Cijena ručnog rada (€/sat) -->
+      <div class="form-group">
+        <label for="laborCostPerHour">Cijena ručnog rada (€/sat):</label>
+        <input type="number" id="laborCostPerHour" min="0" step="0.01" required />
+      </div>
+
+      <!-- Ostali troškovi po komadu (€/kom) -->
+      <div class="form-group">
+        <label for="otherCosts">Ostali troškovi po komadu (€):</label>
+        <input type="number" id="otherCosts" min="0" step="0.01" value="0" />
+      </div>
+
+      <!-- Trošak slanja za kupca (€/ukupno) -->
+      <div class="form-group">
+        <label for="shippingCost">Trošak slanja (za kupca) (€):</label>
+        <input type="number" id="shippingCost" min="0" step="0.01" value="0" />
+      </div>
+
+      <!-- Stvarni trošak slanja (€/ukupno) -->
+      <div class="form-group">
+        <label for="actualShippingCost">Stvarni trošak slanja (za vas) (€):</label>
+        <input type="number" id="actualShippingCost" min="0" step="0.01" value="0" />
+      </div>
+
+      <!-- Marža (%) -->
+      <div class="form-group">
+        <label for="marginPercent">Marža (%):</label>
+        <input
+          type="number"
+          id="marginPercent"
+          min="0"
+          step="0.1"
+          value="100"
+          required
+        />
+      </div>
+
+      <!-- Naziv kupca (opciono) -->
+      <div class="form-group">
+        <label for="customerName">Naziv kupca (opciono):</label>
+        <input
+          type="text"
+          id="customerName"
+          placeholder="Ime ili naziv kupca"
+        />
+      </div>
+
+      <!-- Izvanredni popust (u €) -->
+      <div class="form-group">
+        <label for="specialDiscount">Izvanredni popust (u €):</label>
+        <input type="number" id="specialDiscount" min="0" step="0.01" value="0" />
+      </div>
+
+      <!-- Razredi popusta (sastrane) -->
+      <fieldset class="discount-tiers">
+        <legend>Razredi popusta (količina → %)</legend>
+        <table id="discountTable">
+          <thead>
+            <tr>
+              <th>Min komada</th>
+              <th>Max komada</th>
+              <th>Popust (%)</th>
+              <th>Akcija</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Defaultni redak 1 -->
+            <tr>
+              <td><input type="number" class="tier-min" value="1" min="1" /></td>
+              <td><input type="number" class="tier-max" value="10" min="1" /></td>
+              <td><input type="number" class="tier-percent" value="0" min="0" step="0.1" /></td>
+              <td><button type="button" class="remove-tier">Ukloni</button></td>
+            </tr>
+            <!-- Defaultni redak 2 -->
+            <tr>
+              <td><input type="number" class="tier-min" value="11" min="1" /></td>
+              <td><input type="number" class="tier-max" value="50" min="1" /></td>
+              <td><input type="number" class="tier-percent" value="5" min="0" step="0.1" /></td>
+              <td><button type="button" class="remove-tier">Ukloni</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <button type="button" id="addTierBtn">Dodaj redak</button>
+      </fieldset>
+
+      <button type="submit" id="calculateBtn">Izračunaj cijenu</button>
+    </form>
+
+    <!-- Prikaz osnovnog rezultata (decimalni) uz pie chart pored -->
+    <div id="result" class="result-box" hidden>
+      <h2>Rezultati izračuna:</h2>
+      <div class="result-chart-container">
+        <div class="result-text">
+          <p id="unitCostBeforeMargin"></p>
+          <p id="totalBeforeDiscount"></p>
+          <p id="discountInfo"></p>
+          <p id="totalAfterDiscount"></p>
+          <p id="shippingCostResult"></p>
+          <p id="finalTotalPrice"></p>
+        </div>
+        <div class="result-chart">
+          <canvas id="profitChart" width="200" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Specifikacija za kupca + gumbi za kopiranje/slanje -->
+    <div id="customerSpec" class="spec-box" hidden>
+      <!-- Dinamički se popunjava kroz script.js -->
+    </div>
+  </div>
+
+  <!-- ******** VAŽNO: Redoslijed učitavanja ******** -->
+  <!-- 1) html2canvas -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <!-- 2) jsPDF UMD -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- 3) vlastiti JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>

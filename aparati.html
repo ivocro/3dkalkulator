@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>aparati</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Dodatno podešavanje za tablicu uređivanja */
+    .edit-btn, .delete-btn {
+      padding: 4px 8px;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0 2px;
+    }
+    .edit-btn {
+      background-color: #ffc107;
+      color: #000;
+    }
+    .edit-btn:hover {
+      background-color: #e0a800;
+    }
+    .delete-btn {
+      background-color: #dc3545;
+      color: #fff;
+    }
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 15px;
+      color: #007acc;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Upravljanje aparatima</h1>
+
+    <!-- LINK NA KALKULATOR -->
+    <p>
+      <a href="index.html" class="back-link">&larr; Natrag na kalkulator</a>
+    </p>
+
+    <form id="machine-form">
+      <!-- Skriveno polje za praćenje reda u tablici kad je u modu editiranja -->
+      <input type="hidden" id="editIndex" value="-1" />
+
+      <!-- Naziv aparata -->
+      <div class="form-group">
+        <label for="machineName">Naziv aparata:</label>
+        <input type="text" id="machineName" required />
+      </div>
+
+      <!-- Nabavna vrijednost (EUR) -->
+      <div class="form-group">
+        <label for="purchasePrice">Nabavna vrijednost (EUR):</label>
+        <input type="number" id="purchasePrice" min="0" step="0.01" required />
+      </div>
+
+      <!-- Datum kupnje -->
+      <div class="form-group">
+        <label for="purchaseDate">Datum kupnje:</label>
+        <input type="date" id="purchaseDate" required />
+      </div>
+
+      <!-- Očekivani radni vijek (sati) -->
+      <div class="form-group">
+        <label for="lifetimeHours">Očekivani radni vijek (u satima):</label>
+        <input type="number" id="lifetimeHours" min="1" step="1" required />
+      </div>
+
+      <!-- Ukupni trošak održavanja (EUR) kroz vijek -->
+      <div class="form-group">
+        <label for="maintenanceCost">Ukupni trošak održavanja kroz vijek (EUR):</label>
+        <input type="number" id="maintenanceCost" min="0" step="0.01" required />
+      </div>
+
+      <!-- Snaga aparata (kW) -->
+      <div class="form-group">
+        <label for="powerRating">Snaga aparata (u kW):</label>
+        <input type="number" id="powerRating" min="0" step="0.01" required />
+      </div>
+
+      <!-- Cijena energije (EUR/kWh) -->
+      <div class="form-group">
+        <label for="energyCost">Cijena energije (EUR/kWh):</label>
+        <input type="number" id="energyCost" min="0" step="0.01" required />
+      </div>
+
+      <!-- Dugme za dodavanje/potvrdu izmjena -->
+      <button type="submit" id="saveMachineBtn">Dodaj aparat</button>
+    </form>
+
+    <!-- Popis unesenih aparata -->
+    <table id="machineTable" hidden>
+      <thead>
+        <tr>
+          <th>Naziv aparata</th>
+          <th>Nabavna vrijednost (EUR)</th>
+          <th>Datum kupnje</th>
+          <th>Radni vijek (h)</th>
+          <th>Trošak održavanja (EUR)</th>
+          <th>Snaga (kW)</th>
+          <th>Cijena energ. (€/kWh)</th>
+          <th>Akcije</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Dinamički redci -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const form           = document.getElementById('machine-form');
+    const editIndexInput = document.getElementById('editIndex');
+    const saveBtn        = document.getElementById('saveMachineBtn');
+
+    const nameInput         = document.getElementById('machineName');
+    const priceInput        = document.getElementById('purchasePrice');
+    const dateInput         = document.getElementById('purchaseDate');
+    const lifetimeInput     = document.getElementById('lifetimeHours');
+    const maintenanceInput  = document.getElementById('maintenanceCost');
+    const powerInput        = document.getElementById('powerRating');
+    const energyInput       = document.getElementById('energyCost');
+
+    const table      = document.getElementById('machineTable');
+    const tbody      = table.querySelector('tbody');
+
+    // Učitavanje objekata iz localStorage ili prazna lista
+    let machines = JSON.parse(localStorage.getItem('machines') || '[]');
+
+    // Funkcija za spremanje na localStorage
+    function saveToLocalStorage() {
+      localStorage.setItem('machines', JSON.stringify(machines));
+    }
+
+    // Funkcija za iscrtaavanje tablice
+    function renderTable() {
+      // Očisti sve redove
+      tbody.innerHTML = '';
+
+      machines.forEach((m, index) => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${m.name}</td>
+          <td>${m.price.toFixed(2)}</td>
+          <td>${m.date}</td>
+          <td>${m.lifetime}</td>
+          <td>${m.maintenance.toFixed(2)}</td>
+          <td>${m.power.toFixed(2)}</td>
+          <td>${m.energyCost.toFixed(2)}</td>
+          <td>
+            <button class="edit-btn" data-index="${index}">Uredi</button>
+            <button class="delete-btn" data-index="${index}">Obriši</button>
+          </td>
+        `;
+      });
+
+      table.hidden = machines.length === 0;
+      attachActionListeners();
+    }
+
+    // Poveži event listenere na tipke Edit i Delete
+    function attachActionListeners() {
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.target.getAttribute('data-index'));
+          enterEditMode(idx);
+        });
+      });
+
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.target.getAttribute('data-index'));
+          machines.splice(idx, 1);
+          // Resetiraj formu ako je taj red u edit modu
+          if (parseInt(editIndexInput.value) === idx) {
+            exitEditMode();
+          }
+          saveToLocalStorage();
+          renderTable();
+        });
+      });
+    }
+
+    // Uđi u mod uređenja: popuni polja izabranim aparatom
+    function enterEditMode(idx) {
+      const m = machines[idx];
+      nameInput.value        = m.name;
+      priceInput.value       = m.price;
+      dateInput.value        = m.date;
+      lifetimeInput.value    = m.lifetime;
+      maintenanceInput.value = m.maintenance;
+      powerInput.value       = m.power;
+      energyInput.value      = m.energyCost;
+
+      editIndexInput.value = idx;
+      saveBtn.textContent  = 'Spremi promjene';
+    }
+
+    // Izađi iz moda uređenja: očisti formu
+    function exitEditMode() {
+      form.reset();
+      editIndexInput.value = -1;
+      saveBtn.textContent  = 'Dodaj aparat';
+    }
+
+    // Očitavanje unosa i dodavanje/uređivanje
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const name         = nameInput.value.trim();
+      const price        = parseFloat(priceInput.value) || 0;
+      const date         = dateInput.value;
+      const lifetime     = parseInt(lifetimeInput.value) || 0;
+      const maintenance  = parseFloat(maintenanceInput.value) || 0;
+      const power        = parseFloat(powerInput.value) || 0;
+      const energyCost   = parseFloat(energyInput.value) || 0;
+
+      const idx = parseInt(editIndexInput.value);
+
+      if (idx >= 0) {
+        // Uređivanje postojećeg
+        machines[idx] = { name, price, date, lifetime, maintenance, power, energyCost };
+      } else {
+        // Dodavanje novog
+        machines.push({ name, price, date, lifetime, maintenance, power, energyCost });
+      }
+
+      saveToLocalStorage();
+      exitEditMode();
+      renderTable();
+    });
+
+    // Prilikom učitavanja stranice, prikaži postojeće (ako ih ima)
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTable();
+    });
+  </script>
+</body>
+</html>

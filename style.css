@@ -1,0 +1,210 @@
+/* style.css */
+
+/* ===================== */
+/* OPĆI STILOVI STRANICE */
+/* ===================== */
+
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 800px;
+  margin: 50px auto;
+  background-color: #ffffff;
+  padding: 20px 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+input[type='number'],
+input[type='text'] {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 1rem;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+}
+
+button {
+  display: inline-block;
+  padding: 10px 15px;
+  background-color: #007acc;
+  color: #ffffff;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #005da1;
+}
+
+.discount-tiers {
+  margin-top: 20px;
+  border: 1px solid #cccccc;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.discount-tiers legend {
+  font-weight: bold;
+}
+
+#discountTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+
+#discountTable th,
+#discountTable td {
+  border: 1px solid #cccccc;
+  padding: 6px;
+  text-align: center;
+}
+
+#discountTable input {
+  width: 80px;
+  padding: 4px;
+  font-size: 0.9rem;
+}
+
+#addTierBtn {
+  background-color: #28a745;
+}
+
+#addTierBtn:hover {
+  background-color: #218838;
+}
+
+.remove-tier {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.remove-tier:hover {
+  background-color: #c82333;
+}
+
+.result-box {
+  margin-top: 30px;
+  padding: 15px;
+  background-color: #e8f4fd;
+  border: 1px solid #b7e0fc;
+  border-radius: 4px;
+}
+
+.result-box h2 {
+  margin-bottom: 15px;
+}
+
+/* KONTEJNER ZA REZULTATE I GRAF */
+.result-chart-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+/* TEKSTUALNI DIO REZULTATA */
+.result-text {
+  flex: 1;
+}
+
+/* DIO ZA GRAFIKON */
+.result-chart {
+  width: 200px;
+  height: 200px;
+}
+
+/* =============================== */
+/* STILOVI ZA SPECIFIKACIJU KUPCA  */
+/* =============================== */
+
+.spec-box {
+  margin-top: 30px;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  position: relative;
+}
+
+/* Sadržaj specifikacije (onaj dio koji ide u sliku/PDF) */
+#specContent {
+  /* Unutarnji padding od približno 1cm (40px) */
+  padding: 40px;
+  background-color: #ffffff; /* bijela pozadina */
+}
+
+.spec-logo {
+  display: block;
+  width: 80px;
+  margin: 0 auto 10px; /* Centriraj i razmak sprijeda */
+}
+
+.spec-box h3,
+.spec-box .header-text {
+  margin: 8px 0;
+  text-align: center;
+}
+
+.spec-box p {
+  margin: 6px 0;
+  font-size: 0.95rem;
+}
+
+/* Grupa gumbića za kopiranje i PDF */
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: center;
+}
+
+.button-group button {
+  flex: 1;
+  padding: 8px;
+  font-size: 0.9rem;
+  background-color: #28a745; /* Zeleni za “kopiraj” */
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.button-group button:hover {
+  background-color: #218838;
+}
+
+/* Različiti stil za PDF gumb */
+#savePdfBtn {
+  background-color: #dc3545; /* Crveni za “PDF” */
+}
+
+#savePdfBtn:hover {
+  background-color: #c82333;
+}
