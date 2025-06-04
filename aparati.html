@@ -6,51 +6,104 @@
   <title>aparati</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* ... (isti stilovi kao prije) ... */
+    /* Dodatno podešavanje za tablicu uređivanja */
+    .edit-btn, .delete-btn {
+      padding: 4px 8px;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0 2px;
+    }
+    .edit-btn {
+      background-color: #ffc107;
+      color: #000;
+    }
+    .edit-btn:hover {
+      background-color: #e0a800;
+    }
+    .delete-btn {
+      background-color: #dc3545;
+      color: #fff;
+    }
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 15px;
+      color: #007acc;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
   </style>
+
+  <!-- 1) Firebase App (core) SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <!-- 2) Firebase Firestore SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <div class="container">
     <h1>Upravljanje aparatima</h1>
 
+    <!-- LINK NA KALKULATOR -->
     <p>
       <a href="index.html" class="back-link">&larr; Natrag na kalkulator</a>
     </p>
 
     <form id="machine-form">
-      <input type="hidden" id="editIndex" value="-1" />
+      <!-- Polje za praćenje indeksa prilikom uređivanja -->
+      <input type="hidden" id="editId" value="" />
 
+      <!-- Naziv aparata -->
       <div class="form-group">
         <label for="machineName">Naziv aparata:</label>
         <input type="text" id="machineName" required />
       </div>
+
+      <!-- Nabavna vrijednost (EUR) -->
       <div class="form-group">
         <label for="purchasePrice">Nabavna vrijednost (EUR):</label>
         <input type="number" id="purchasePrice" min="0" step="0.01" required />
       </div>
+
+      <!-- Datum kupnje -->
       <div class="form-group">
         <label for="purchaseDate">Datum kupnje:</label>
         <input type="date" id="purchaseDate" required />
       </div>
+
+      <!-- Očekivani radni vijek (sati) -->
       <div class="form-group">
         <label for="lifetimeHours">Očekivani radni vijek (u satima):</label>
         <input type="number" id="lifetimeHours" min="1" step="1" required />
       </div>
+
+      <!-- Ukupni trošak održavanja (EUR) kroz vijek -->
       <div class="form-group">
         <label for="maintenanceCost">Ukupni trošak održavanja kroz vijek (EUR):</label>
         <input type="number" id="maintenanceCost" min="0" step="0.01" required />
       </div>
+
+      <!-- Snaga aparata (kW) -->
       <div class="form-group">
         <label for="powerRating">Snaga aparata (u kW):</label>
         <input type="number" id="powerRating" min="0" step="0.01" required />
       </div>
+
+      <!-- Cijena energije (EUR/kWh) -->
       <div class="form-group">
         <label for="energyCost">Cijena energije (EUR/kWh):</label>
         <input type="number" id="energyCost" min="0" step="0.01" required />
       </div>
+
+      <!-- Dugme za dodavanje/potvrdu izmjena -->
       <button type="submit" id="saveMachineBtn">Dodaj aparat</button>
     </form>
 
+    <!-- Popis unesenih aparata -->
     <table id="machineTable" hidden>
       <thead>
         <tr>
@@ -69,40 +122,45 @@
   </div>
 
   <script>
+    // ======= 1) Firebase konfiguracija =======
+    //  Ovaj dio zamijeni s vlastitim konfiguracijskim podacima
+const firebaseConfig = {
+  apiKey: "AIzaSyCIq-37qCC2YkdqTDfrB1vz9VbOtt8hvVM",
+  authDomain: "modelico-kalkulator.firebaseapp.com",
+  projectId: "modelico-kalkulator",
+  storageBucket: "modelico-kalkulator.firebasestorage.app",
+  messagingSenderId: "12370063576",
+  appId: "1:12370063576:web:4b669228036e1f929567ad"
+};
+
+    // Inicijaliziraj Firebase
+    firebase.initializeApp(firebaseConfig);
+    // Inicijaliziraj Firestore
+    const db = firebase.firestore();
+
+    // ======= 2) Selektiraj DOM elemente =======
     const form           = document.getElementById('machine-form');
-    const editIndexInput = document.getElementById('editIndex');
+    const editIdInput    = document.getElementById('editId');
     const saveBtn        = document.getElementById('saveMachineBtn');
 
-    const nameInput         = document.getElementById('machineName');
-    const priceInput        = document.getElementById('purchasePrice');
-    const dateInput         = document.getElementById('purchaseDate');
-    const lifetimeInput     = document.getElementById('lifetimeHours');
-    const maintenanceInput  = document.getElementById('maintenanceCost');
-    const powerInput        = document.getElementById('powerRating');
-    const energyInput       = document.getElementById('energyCost');
+    const nameInput        = document.getElementById('machineName');
+    const priceInput       = document.getElementById('purchasePrice');
+    const dateInput        = document.getElementById('purchaseDate');
+    const lifetimeInput    = document.getElementById('lifetimeHours');
+    const maintenanceInput = document.getElementById('maintenanceCost');
+    const powerInput       = document.getElementById('powerRating');
+    const energyInput      = document.getElementById('energyCost');
 
     const table      = document.getElementById('machineTable');
     const tbody      = table.querySelector('tbody');
 
-    let machines = []; 
+    // ======= 3) Funkcija za iscrtavanje tablice iz Firestore podataka =======
+    function renderTable(machines) {
+      tbody.innerHTML = ''; // isprazni tablicu
 
-    // 1) PRI UČITAVANJU STRANICE: fetchaj machines.json
-    async function loadFromJson() {
-      try {
-        const resp = await fetch('machines.json');
-        if (!resp.ok) throw new Error('Ne mogu učitati machines.json');
-        machines = await resp.json();
-      } catch (err) {
-        console.warn('Greška pri učitavanju machines.json, koristim prazan niz:', err);
-        machines = [];
-      }
-      renderTable();
-    }
-
-    // 2) renderTable() iscrtava tablicu iz niza 'machines'
-    function renderTable() {
-      tbody.innerHTML = '';
-      machines.forEach((m, index) => {
+      machines.forEach(doc => {
+        const m = doc.data();
+        const id = doc.id;
         const row = tbody.insertRow();
         row.innerHTML = `
           <td>${m.name}</td>
@@ -113,54 +171,97 @@
           <td>${m.power.toFixed(2)}</td>
           <td>${m.energyCost.toFixed(2)}</td>
           <td>
-            <button class="edit-btn" data-index="${index}">Uredi</button>
-            <button class="delete-btn" data-index="${index}">Obriši</button>
+            <button class="edit-btn" data-id="${id}">Uredi</button>
+            <button class="delete-btn" data-id="${id}">Obriši</button>
           </td>
         `;
       });
+
       table.hidden = machines.length === 0;
       attachActionListeners();
     }
 
-    // 3) veži Edit/Delete event listenere
+    // ======= 4) Dodeli event listenere za Edit i Delete gumbiće =======
     function attachActionListeners() {
       document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-          const idx = +e.target.dataset.index;
-          enterEditMode(idx);
+        btn.addEventListener('click', (e) => {
+          const docId = e.target.dataset.id;
+          enterEditMode(docId);
         });
       });
       document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-          const idx = +e.target.dataset.index;
-          machines.splice(idx, 1);
-          renderTable();
-          // NAKON BRIŠENJA: morat ćeš ručno commitati machines.json
+        btn.addEventListener('click', (e) => {
+          const docId = e.target.dataset.id;
+          deleteMachine(docId);
         });
       });
     }
 
-    function enterEditMode(idx) {
-      const m = machines[idx];
-      nameInput.value        = m.name;
-      priceInput.value       = m.price;
-      dateInput.value        = m.date;
-      lifetimeInput.value    = m.lifetime;
-      maintenanceInput.value = m.maintenance;
-      powerInput.value       = m.power;
-      energyInput.value      = m.energyCost;
+    // ======= 5) Uđi u mod uređivanja (popuni formu podacima iz Firestore) =======
+    async function enterEditMode(docId) {
+      const docSnap = await db.collection('machines').doc(docId).get();
+      if (docSnap.exists) {
+        const m = docSnap.data();
+        nameInput.value        = m.name;
+        priceInput.value       = m.price;
+        dateInput.value        = m.date;
+        lifetimeInput.value    = m.lifetime;
+        maintenanceInput.value = m.maintenance;
+        powerInput.value       = m.power;
+        energyInput.value      = m.energyCost;
 
-      editIndexInput.value = idx;
-      saveBtn.textContent  = 'Spremi promjene';
+        editIdInput.value = docId;
+        saveBtn.textContent = 'Spremi promjene';
+      }
     }
 
+    // ======= 6) Izađi iz moda uređivanja (očisti formu) =======
     function exitEditMode() {
       form.reset();
-      editIndexInput.value = -1;
-      saveBtn.textContent  = 'Dodaj aparat';
+      editIdInput.value = '';
+      saveBtn.textContent = 'Dodaj aparat';
     }
 
-    form.addEventListener('submit', e => {
+    // ======= 7) Dodavanje novog aparata u Firestore =======
+    async function addMachine(machineData) {
+      try {
+        await db.collection('machines').add(machineData);
+      } catch (err) {
+        console.error('Greška pri dodavanju aparata:', err);
+      }
+    }
+
+    // ======= 8) Ažuriranje postojećeg aparata =======
+    async function updateMachine(docId, machineData) {
+      try {
+        await db.collection('machines').doc(docId).update(machineData);
+      } catch (err) {
+        console.error('Greška pri ažuriranju aparata:', err);
+      }
+    }
+
+    // ======= 9) Brisanje aparata iz Firestore =======
+    async function deleteMachine(docId) {
+      try {
+        await db.collection('machines').doc(docId).delete();
+      } catch (err) {
+        console.error('Greška pri brisanju aparata:', err);
+      }
+    }
+
+    // ======= 10) Učitaj sve aparate iz Firestore i iscrtaj tablicu =======
+    function loadMachines() {
+      // “onSnapshot” automatski prati promjene u kolekciji i re-rendera tablicu
+      db.collection('machines')
+        .orderBy('name') // po imenu abecedno
+        .onSnapshot(snapshot => {
+          renderTable(snapshot.docs);
+          exitEditMode();
+        });
+    }
+
+    // ======= 11) Event listener za formu (dodaj/uredi) =======
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name        = nameInput.value.trim();
       const price       = parseFloat(priceInput.value) || 0;
@@ -170,18 +271,22 @@
       const power       = parseFloat(powerInput.value) || 0;
       const energyCost  = parseFloat(energyInput.value) || 0;
 
-      const idx = +editIndexInput.value;
-      if (idx >= 0) {
-        machines[idx] = { name, price, date, lifetime, maintenance, power, energyCost };
+      const machineData = { name, price, date, lifetime, maintenance, power, energyCost };
+      const docId = editIdInput.value;
+
+      if (docId) {
+        // režim uređivanja
+        await updateMachine(docId, machineData);
       } else {
-        machines.push({ name, price, date, lifetime, maintenance, power, energyCost });
+        // režim dodavanja
+        await addMachine(machineData);
       }
       exitEditMode();
-      renderTable();
-      // NAKON BILO KAKVE IZMJENE: machines.json MORAJU BI TEBE RUČNO AŽURIRATI (vidi dolje)
+      // “onSnapshot” će automatski pozvati renderTable
     });
 
-    document.addEventListener('DOMContentLoaded', loadFromJson);
+    // ======= 12) Po učitavanju stranice startaj loadMachines =======
+    document.addEventListener('DOMContentLoaded', loadMachines);
   </script>
 </body>
 </html>
