@@ -15,7 +15,7 @@ body {
 }
 
 .container {
-  max-width: 900px;
+  max-width: 800px;
   margin: 50px auto;
   background-color: #ffffff;
   padding: 20px 30px;
@@ -23,9 +23,9 @@ body {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* ===================== */
-/* STILOVI ZA FORME      */
-/* ===================== */
+/* =============================== */
+/* STILOVI ZA KALKULATOR (index.html) */
+/* =============================== */
 
 h1 {
   text-align: center;
@@ -69,10 +69,6 @@ input[type='date']:focus {
   border-color: #007acc;
   outline: none;
 }
-
-/* =============================== */
-/* STILOVI ZA KALKULATOR (index.html) */
-/* =============================== */
 
 /* Gumb “Izračunaj cijenu” */
 #calculateBtn {
@@ -179,7 +175,10 @@ input[type='date']:focus {
   height: 200px;
 }
 
-/* Specifikacija za kupca */
+/* =============================== */
+/* STILOVI ZA SPECIKACIJU KUPCA    */
+/* =============================== */
+
 .spec-box {
   margin-top: 30px;
   background-color: #ffffff;
@@ -189,13 +188,13 @@ input[type='date']:focus {
 }
 
 #specContent {
-  padding: 40px; /* oko 1 cm paddinga za lijep rub */
+  padding: 40px; /* oko 1 cm paddinga */
   background-color: #ffffff;
 }
 
 .spec-logo {
   display: block;
-  width: 80px; 
+  width: 80px;
   margin: 0 auto 10px;
 }
 
@@ -228,6 +227,7 @@ input[type='date']:focus {
   transition: opacity 0.2s ease;
 }
 
+/* Gumb “Kopiraj kao sliku” (zeleni) */
 #copyBtnInline {
   background-color: #28a745;
 }
@@ -236,6 +236,7 @@ input[type='date']:focus {
   opacity: 0.9;
 }
 
+/* Gumb “Spremi kao PDF” (crveni) */
 #savePdfBtn {
   background-color: #dc3545;
 }
@@ -250,82 +251,15 @@ input[type='date']:focus {
   color: #555;
 }
 
-/* =============================== */
-/* STILOVI ZA UPRAVLJANJE APARATIMA (aparati.html) */
-/* =============================== */
-
-#machineTable {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 30px;
-  font-size: 0.95rem;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
-}
-
-#machineTable thead {
-  background-color: #007acc;
-}
-
-#machineTable th {
-  padding: 12px 10px;
-  text-align: left;
-  color: #ffffff;
-  font-weight: bold;
-}
-
-#machineTable tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-#machineTable tbody tr:hover {
-  background-color: #e8f4fd;
-}
-
-#machineTable td {
-  padding: 10px;
-  border-bottom: 1px solid #dddddd;
-  color: #333333;
-}
-
-#machineTable[hidden] {
-  display: none;
-}
-
-.edit-btn, .delete-btn {
-  padding: 4px 8px;
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 4px;
-  margin: 0 2px;
-  transition: opacity 0.2s ease, background-color 0.2s ease;
-}
-
-.edit-btn {
-  background-color: #ffc107;
-  color: #000;
-}
-
-.edit-btn:hover {
-  background-color: #e0a800;
-  opacity: 0.9;
-}
-
-.delete-btn {
-  background-color: #dc3545;
-  color: #fff;
-}
-
-.delete-btn:hover {
-  background-color: #c82333;
-  opacity: 0.9;
-}
-
 /* ===================== */
-/* DODATNI OPĆI STILOVI   */
+/* OPĆI DODATNI STILOVI   */
 /* ===================== */
 
 input::placeholder {
   color: #aaa;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
 }
