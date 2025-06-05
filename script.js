@@ -413,9 +413,56 @@ document.addEventListener('DOMContentLoaded', () => {
     loadMachinesIntoSelect();
   }); // === Kraj DOMContentLoaded callback ===
 
-  // ===== CESKIH: Ove funkcije moraju biti definirane unutar DOMContentLoaded, ali možemo ih deklarirati i van for clarity =====
+  
+  // ===== Ovdje možemo deklarirati pomoćne funkcije van tijela submit callbacka, no one se koriste isključivo unutar njega =====
 
-  // 3) Funkcija za učitavanje aparata (već gore, unutar DOMContentLoaded)
-  // 4) Funkcija za listener odabira aparata (već gore, unutar DOMContentLoaded)
-  // 5) Logic for discount tiers and form submission (već gore, unutar DOMContentLoaded)
+  // 3) Funkcija za učitavanje aparata
+  async function loadMachinesIntoSelect() {
+    console.log('📡 Počinjem dohvat aparata iz Firestorea...');
+    try {
+      const snapshot = await db.collection('machines').orderBy('name').get();
+
+      if (snapshot.empty) {
+        console.warn('⚠️ U Firestore kolekciji "machines" nema nijednog dokumenta.');
+      }
+
+      let brojac = 0;
+      snapshot.forEach(doc => {
+        const m = doc.data();
+        const option = document.createElement('option');
+        option.value = m.cijenaRada.toFixed(2);
+        option.textContent = `${m.name} (€/sat: ${m.cijenaRada.toFixed(2)})`;
+        machineSelect.appendChild(option);
+        brojac++;
+      });
+
+      console.log(`✅ Uspješno dodano ${brojac} opcija u <select> (machineSelect).`);
+    } catch (err) {
+      console.error('❌ Greška pri dohvaćanju aparata iz Firestorea:', err);
+    }
+  }
+
+  // 4) Listener za promjenu odabira aparata
+  function setupMachineSelectListener() {
+    if (!machineSelect) {
+      console.error('❌ Element #machineSelect nije pronađen u DOM-u.');
+      return;
+    }
+    if (!machineCostInput) {
+      console.error('❌ Element #machineCostPerHour nije pronađen u DOM-u.');
+      return;
+    }
+
+    machineSelect.addEventListener('change', () => {
+      console.log('🔄 machineSelect.change event aktiviran.');
+      let totalMachineCost = 0;
+      Array.from(machineSelect.selectedOptions).forEach(opt => {
+        const val = parseFloat(opt.value) || 0;
+        totalMachineCost += val;
+        console.log(`   odabrano: "${opt.textContent}", value=${val}`);
+      });
+      machineCostInput.value = totalMachineCost.toFixed(2);
+      console.log(`   => machineCostPerHour postavljen na: ${machineCostInput.value}`);
+    });
+  }
 });
