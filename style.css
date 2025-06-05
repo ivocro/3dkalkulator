@@ -11,10 +11,11 @@ body {
   background-color: #f5f5f5;
   margin: 0;
   padding: 0;
+  color: #333;
 }
 
 .container {
-  max-width: 900px;         /* Širina kontejnera proširena za bolju preglednost */
+  max-width: 900px;
   margin: 50px auto;
   background-color: #ffffff;
   padding: 20px 30px;
@@ -22,45 +23,25 @@ body {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* ===================== */
+/* STILOVI ZA FORME      */
+/* ===================== */
+
 h1 {
   text-align: center;
   margin-bottom: 25px;
 }
 
-/* =============================== */
-/* STILOVI ZA UPRAVLJANJE APARATIMA */
-/* =============================== */
-
-/* Dugme "Dodaj aparat" */
-#saveMachineBtn {
-  background-color: #007acc;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 15px;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: background-color 0.2s ease;
-}
-#saveMachineBtn:hover {
-  background-color: #005da1;
-}
-
-/* Link natrag na kalkulator */
-.back-link {
-  display: inline-block;
+h2 {
+  margin-top: 30px;
   margin-bottom: 15px;
-  color: #007acc;
-  font-size: 0.95rem;
-  transition: color 0.2s ease;
-}
-.back-link:hover {
-  color: #005da1;
-  text-decoration: underline;
 }
 
-/* Forma za unos */
+h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
 .form-group {
   margin-bottom: 15px;
 }
@@ -81,6 +62,7 @@ input[type='date'] {
   border-radius: 4px;
   transition: border-color 0.2s ease;
 }
+
 input[type='number']:focus,
 input[type='text']:focus,
 input[type='date']:focus {
@@ -88,23 +70,200 @@ input[type='date']:focus {
   outline: none;
 }
 
-/* ===================== */
-/* STILOVI ZA TABLICU   */
-/* ===================== */
+/* =============================== */
+/* STILOVI ZA KALKULATOR (index.html) */
+/* =============================== */
 
-/* Cijela tablica */
+/* Gumb “Izračunaj cijenu” */
+#calculateBtn {
+  background-color: #007acc;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 15px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.2s ease;
+}
+
+#calculateBtn:hover {
+  background-color: #005da1;
+}
+
+/* Razredi popusta */
+.discount-tiers {
+  margin-top: 20px;
+  border: 1px solid #cccccc;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.discount-tiers legend {
+  font-weight: bold;
+}
+
+#discountTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+
+#discountTable th,
+#discountTable td {
+  border: 1px solid #cccccc;
+  padding: 6px;
+  text-align: center;
+}
+
+#discountTable input {
+  width: 80px;
+  padding: 4px;
+  font-size: 0.9rem;
+}
+
+#addTierBtn {
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#addTierBtn:hover {
+  background-color: #218838;
+}
+
+.remove-tier {
+  background-color: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.remove-tier:hover {
+  background-color: #c82333;
+}
+
+/* Rezultati kalkulacije */
+.result-box {
+  margin-top: 30px;
+  padding: 15px;
+  background-color: #e8f4fd;
+  border: 1px solid #b7e0fc;
+  border-radius: 4px;
+}
+
+.result-box h2 {
+  margin-bottom: 15px;
+}
+
+.result-chart-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.result-text {
+  flex: 1;
+}
+
+.result-chart {
+  width: 200px;
+  height: 200px;
+}
+
+/* Specifikacija za kupca */
+.spec-box {
+  margin-top: 30px;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  position: relative;
+}
+
+#specContent {
+  padding: 40px; /* oko 1 cm paddinga za lijep rub */
+  background-color: #ffffff;
+}
+
+.spec-logo {
+  display: block;
+  width: 80px; 
+  margin: 0 auto 10px;
+}
+
+.spec-box h3,
+.spec-box .header-text {
+  margin: 8px 0;
+  text-align: center;
+}
+
+.spec-box p {
+  margin: 6px 0;
+  font-size: 0.95rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: center;
+}
+
+.button-group button {
+  flex: 1;
+  padding: 8px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+#copyBtnInline {
+  background-color: #28a745;
+}
+
+#copyBtnInline:hover {
+  opacity: 0.9;
+}
+
+#savePdfBtn {
+  background-color: #dc3545;
+}
+
+#savePdfBtn:hover {
+  opacity: 0.9;
+}
+
+/* Datum u specifikaciji */
+.spec-box p[style*="text-align:right"] {
+  font-size: 0.425rem;
+  color: #555;
+}
+
+/* =============================== */
+/* STILOVI ZA UPRAVLJANJE APARATIMA (aparati.html) */
+/* =============================== */
+
 #machineTable {
   width: 100%;
   border-collapse: collapse;
   margin-top: 30px;
   font-size: 0.95rem;
-  /* Ravni vrh i dno za bolji dojam */
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Zaglavlje tablice */
 #machineTable thead {
   background-color: #007acc;
 }
@@ -116,74 +275,57 @@ input[type='date']:focus {
   font-weight: bold;
 }
 
-/*                                                                                            */
-/* ======================================================================================= */
-/* Tijelo tablice (svaki red)                                                              */
-/* ======================================================================================= */
-/*                                                                                            */
-
-/* Svaki drugi red (zebra efekt) */
 #machineTable tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-/* Hover efekt na redove */
 #machineTable tbody tr:hover {
   background-color: #e8f4fd;
 }
 
-/* Ćelije u tijelu tablice */
 #machineTable td {
   padding: 10px;
   border-bottom: 1px solid #dddddd;
   color: #333333;
 }
 
-/* Kada nema podataka, tablica se sakrije */
 #machineTable[hidden] {
   display: none;
 }
 
-/* ===================== */
-/* STILOVI ZA GUMBIĆE    */
-/* ===================== */
+.edit-btn, .delete-btn {
+  padding: 4px 8px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  margin: 0 2px;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
 
-/* Gumb Uredi */
 .edit-btn {
   background-color: #ffc107;
   color: #000;
-  border: none;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease, opacity 0.2s ease;
 }
+
 .edit-btn:hover {
   background-color: #e0a800;
   opacity: 0.9;
 }
 
-/* Gumb Obriši */
 .delete-btn {
   background-color: #dc3545;
   color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease, opacity 0.2s ease;
 }
+
 .delete-btn:hover {
   background-color: #c82333;
   opacity: 0.9;
 }
 
 /* ===================== */
-/* OPĆI STILOVI BODOVI   */
+/* DODATNI OPĆI STILOVI   */
 /* ===================== */
 
-button {
-  font-family: inherit;
+input::placeholder {
+  color: #aaa;
 }
