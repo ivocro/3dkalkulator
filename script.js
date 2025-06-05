@@ -1,6 +1,5 @@
 // script.js
 
-// 1) Definiramo globalne varijable za DOM elemente i za Firestore
 let db;
 let machineSelect;
 let machineCostInput;
@@ -33,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const weightInput           = document.getElementById('weightGrams');
   const materialInput         = document.getElementById('materialCost');
   const printTimeInput        = document.getElementById('printTime');
-  machineSelect               = document.getElementById('machineSelect');
-  machineCostInput            = document.getElementById('machineCostPerHour');
+  machineSelect               = document.getElementById('machineSelect');           // *************************
+  machineCostInput            = document.getElementById('machineCostPerHour');     // *************************
   const laborTimeInput        = document.getElementById('laborTime');
   const laborCostInput        = document.getElementById('laborCostPerHour');
   const otherCostsInput       = document.getElementById('otherCosts');
@@ -67,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       let brojac = 0;
+      // Dodajemo svaku opciju u <select>
       snapshot.forEach(doc => {
         const m = doc.data();
         const option = document.createElement('option');
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         brojac++;
       });
 
-      console.log(`✅ Uspješno dodano ${brojac} opcija u <select> (machineSelect).`);
+      console.log(`✅ Uspješno dodano ${brojac} opcija u <select> "machineSelect".`);
     } catch (err) {
       console.error('❌ Greška pri dohvaćanju aparata iz Firestorea:', err);
     }
@@ -407,62 +407,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // ======= 11) Pozovi funkcije za odabir aparata i učitavanje iz Firestorea =======
+    // 11) Pozovi funkcije za odabir aparata i učitavanje iz Firestorea
     console.log('⚙️ Postavljam listener za odabir aparata i učitavam podatke...');
     setupMachineSelectListener();
     loadMachinesIntoSelect();
   }); // === Kraj DOMContentLoaded callback ===
-
-  
-  // ===== Ovdje možemo deklarirati pomoćne funkcije van tijela submit callbacka, no one se koriste isključivo unutar njega =====
-
-  // 3) Funkcija za učitavanje aparata
-  async function loadMachinesIntoSelect() {
-    console.log('📡 Počinjem dohvat aparata iz Firestorea...');
-    try {
-      const snapshot = await db.collection('machines').orderBy('name').get();
-
-      if (snapshot.empty) {
-        console.warn('⚠️ U Firestore kolekciji "machines" nema nijednog dokumenta.');
-      }
-
-      let brojac = 0;
-      snapshot.forEach(doc => {
-        const m = doc.data();
-        const option = document.createElement('option');
-        option.value = m.cijenaRada.toFixed(2);
-        option.textContent = `${m.name} (€/sat: ${m.cijenaRada.toFixed(2)})`;
-        machineSelect.appendChild(option);
-        brojac++;
-      });
-
-      console.log(`✅ Uspješno dodano ${brojac} opcija u <select> (machineSelect).`);
-    } catch (err) {
-      console.error('❌ Greška pri dohvaćanju aparata iz Firestorea:', err);
-    }
-  }
-
-  // 4) Listener za promjenu odabira aparata
-  function setupMachineSelectListener() {
-    if (!machineSelect) {
-      console.error('❌ Element #machineSelect nije pronađen u DOM-u.');
-      return;
-    }
-    if (!machineCostInput) {
-      console.error('❌ Element #machineCostPerHour nije pronađen u DOM-u.');
-      return;
-    }
-
-    machineSelect.addEventListener('change', () => {
-      console.log('🔄 machineSelect.change event aktiviran.');
-      let totalMachineCost = 0;
-      Array.from(machineSelect.selectedOptions).forEach(opt => {
-        const val = parseFloat(opt.value) || 0;
-        totalMachineCost += val;
-        console.log(`   odabrano: "${opt.textContent}", value=${val}`);
-      });
-      machineCostInput.value = totalMachineCost.toFixed(2);
-      console.log(`   => machineCostPerHour postavljen na: ${machineCostInput.value}`);
-    });
-  }
 });
