@@ -1,6 +1,13 @@
 // script.js
 
+// 1) Definiramo globalne varijable za DOM elemente i za Firestore
+let db;
+let machineSelect;
+let machineCostInput;
+
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('📝 DOMContentLoaded pokrenut, inicijaliziram skriptu.');
+
   // ======= 1) Firebase konfiguracija =======
   const firebaseConfig = {
     apiKey: "AIzaSyCIq-37qCC2YkdqTDfrB1vz9VbOtt8hvVM",
@@ -13,7 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Inicijaliziraj Firebase i Firestore
   firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+  db = firebase.firestore();
+  console.log('✅ Firebase i Firestore inicijalizirani.');
 
   // ======= 2) Selektiraj DOM elemente =======
   const form               = document.getElementById('price-form');
@@ -25,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const weightInput           = document.getElementById('weightGrams');
   const materialInput         = document.getElementById('materialCost');
   const printTimeInput        = document.getElementById('printTime');
-  const machineSelect         = document.getElementById('machineSelect');           // selektor
-  const machineCostInput      = document.getElementById('machineCostPerHour');     // polje koje će se automatski popunjavati
+  machineSelect               = document.getElementById('machineSelect');
+  machineCostInput            = document.getElementById('machineCostPerHour');
   const laborTimeInput        = document.getElementById('laborTime');
   const laborCostInput        = document.getElementById('laborCostPerHour');
   const otherCostsInput       = document.getElementById('otherCosts');
@@ -50,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ======= 3) Funkcija za učitavanje aparata i popunjavanje <select> =======
   async function loadMachinesIntoSelect() {
+    console.log('📡 Počinjem dohvat aparata iz Firestorea...');
     try {
       const snapshot = await db.collection('machines').orderBy('name').get();
 
@@ -57,22 +66,23 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('⚠️ U Firestore kolekciji "machines" nema nijednog dokumenta.');
       }
 
+      let brojac = 0;
       snapshot.forEach(doc => {
         const m = doc.data();
         const option = document.createElement('option');
-        // value = cijenaRada; tekst = ime aparata i cijena rada
         option.value = m.cijenaRada.toFixed(2);
         option.textContent = `${m.name} (€/sat: ${m.cijenaRada.toFixed(2)})`;
         machineSelect.appendChild(option);
+        brojac++;
       });
 
-      console.log(`✅ Uspješno dodano ${machineSelect.options.length} opcija u <select> "machineSelect".`);
+      console.log(`✅ Uspješno dodano ${brojac} opcija u <select> (machineSelect).`);
     } catch (err) {
       console.error('❌ Greška pri dohvaćanju aparata iz Firestorea:', err);
     }
   }
 
-  // ======= 4) Postavljanje event listenera na <select> =======
+  // ======= 4) Postavi event listener za <select> =======
   function setupMachineSelectListener() {
     if (!machineSelect) {
       console.error('❌ Element #machineSelect nije pronađen u DOM-u.');
@@ -145,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ======= 7) “Submit” forme – glavni izračun =======
   form.addEventListener('submit', (e) => {
     e.preventDefault();
+    console.log('▶️ Submit forme pokrenut – radim izračun...');
 
     // 1) Pokupi unesene vrijednosti
     const quantity             = parseInt(quantityInput.value) || 1;
@@ -183,12 +194,8 @@ document.addEventListener('DOMContentLoaded', () => {
       totalPriceBeforeDiscountDecimal - discountAmountDecimal;
 
     // 5) Izračun ukupnog troška (bez slanja) i konačne cijene za kupca
-    // totalCostWithoutShipping: stvarni trošak proizvodnje (bez marže i slanja)
     const totalCostWithoutShipping   = costPerUnitBeforeMargin * quantity;
-    // finalPriceDecimal: što kupac plaća (nakon popusta i sa slanjem za kupca)
     const finalPriceDecimal          = totalAfterDiscountValueDecimal + shippingCostForBuyer;
-
-    // Trošak s poštarinom (stvarni trošak + stvarni trošak slanja)
     const totalCostWithShipping      = totalCostWithoutShipping + actualShippingCost;
 
     // 6) Prikaz rezultata (decimalno)
@@ -330,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 9) Kopiraj kao sliku
     const copyBtnInline = document.getElementById('copyBtnInline');
-    const specContent    = document.getElementById('specContent');
+    const specContent   = document.getElementById('specContent');
 
     copyBtnInline.addEventListener('click', () => {
       if (typeof html2canvas !== 'function') {
@@ -400,10 +407,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // ======= 11) Pozovi funkcije za odabir aparata i učitavanje iz Firestorea =======
+    console.log('⚙️ Postavljam listener za odabir aparata i učitavam podatke...');
+    setupMachineSelectListener();
+    loadMachinesIntoSelect();
   }); // === Kraj DOMContentLoaded callback ===
 
-  // ==== Poziv init listenera i učitavanje aparata stiže ovdje ====
-  setupMachineSelectListener();
-  loadMachinesIntoSelect();
+  // ===== CESKIH: Ove funkcije moraju biti definirane unutar DOMContentLoaded, ali možemo ih deklarirati i van for clarity =====
 
-}); // === Kraj cijelog script.js ===
+  // 3) Funkcija za učitavanje aparata (već gore, unutar DOMContentLoaded)
+  // 4) Funkcija za listener odabira aparata (već gore, unutar DOMContentLoaded)
+  // 5) Logic for discount tiers and form submission (već gore, unutar DOMContentLoaded)
+});
