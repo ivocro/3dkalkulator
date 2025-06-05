@@ -12,7 +12,7 @@
   <!-- 2) Firebase Firestore SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
-  <!-- Chart.js + Datalabels plugin -->
+  <!-- Chart.js + plugin za datalabels -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 </head>
@@ -54,11 +54,11 @@
       <div class="form-group">
         <label for="machineSelect">Odaberi aparate (više je moguće):</label>
         <select id="machineSelect" multiple size="4">
-          <!-- Opcije ćemo dinamički dodati kroz JavaScript -->
+          <!-- Opcije će se dinamčki dodati kroz JavaScript -->
         </select>
       </div>
 
-      <!-- Cijena rada 3D printera (€/sat): automatski se popunjava -->
+      <!-- Cijena rada aparata (€/sat): automatski se popunjava -->
       <div class="form-group">
         <label for="machineCostPerHour">Cijena rada aparata (€/sat):</label>
         <input
