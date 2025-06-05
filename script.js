@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const weightInput           = document.getElementById('weightGrams');
   const materialInput         = document.getElementById('materialCost');
   const printTimeInput        = document.getElementById('printTime');
-  machineSelect               = document.getElementById('machineSelect');           // *************************
-  machineCostInput            = document.getElementById('machineCostPerHour');     // *************************
+  machineSelect               = document.getElementById('machineSelect');        // ****************
+  machineCostInput            = document.getElementById('machineCostPerHour');  // ****************
   const laborTimeInput        = document.getElementById('laborTime');
   const laborCostInput        = document.getElementById('laborCostPerHour');
   const otherCostsInput       = document.getElementById('otherCosts');
@@ -69,6 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
       // Dodajemo svaku opciju u <select>
       snapshot.forEach(doc => {
         const m = doc.data();
+        // Provjera: da li dokument baš ima polje cijenaRada?
+        if (m.cijenaRada === undefined) {
+          console.warn(`Dokument "${doc.id}" nema polje cijenaRada. Ignoriram ga.`);
+          return;
+        }
         const option = document.createElement('option');
         option.value = m.cijenaRada.toFixed(2);
         option.textContent = `${m.name} (€/sat: ${m.cijenaRada.toFixed(2)})`;
@@ -406,10 +411,11 @@ document.addEventListener('DOMContentLoaded', () => {
           alert('Greška pri izradi slike za PDF. Provjeri konzolu.');
         });
     });
-
-    // 11) Pozovi funkcije za odabir aparata i učitavanje iz Firestorea
-    console.log('⚙️ Postavljam listener za odabir aparata i učitavam podatke...');
-    setupMachineSelectListener();
-    loadMachinesIntoSelect();
   }); // === Kraj DOMContentLoaded callback ===
+
+  // ======= 11) Pozivi za učitavanje aparata i postavljanje listenera =======
+  // Ovdje *izvan* form.addEventListener, ali unutar DOMContentLoaded:
+  console.log('⚙️ Postavljam listener za odabir aparata i učitavam podatke...');
+  setupMachineSelectListener();
+  loadMachinesIntoSelect();
 });
