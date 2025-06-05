@@ -2,7 +2,6 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   // ======= 1) Firebase konfiguracija =======
-  // (Na istom mjestu gdje su bili u aparati.html)
   const firebaseConfig = {
     apiKey: "AIzaSyCIq-37qCC2YkdqTDfrB1vz9VbOtt8hvVM",
     authDomain: "modelico-kalkulator.firebaseapp.com",
@@ -31,8 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const laborTimeInput        = document.getElementById('laborTime');
   const laborCostInput        = document.getElementById('laborCostPerHour');
   const otherCostsInput       = document.getElementById('otherCosts');
-  const shippingCostInput     = document.getElementById('shippingCost');         // trošak za kupca
-  const actualShippingInput   = document.getElementById('actualShippingCost');   // stvarni trošak slanja
+  const shippingCostInput     = document.getElementById('shippingCost');
+  const actualShippingInput   = document.getElementById('actualShippingCost');
   const marginInput           = document.getElementById('marginPercent');
   const customerNameInput     = document.getElementById('customerName');
   const specialDiscountInput  = document.getElementById('specialDiscount');
@@ -44,42 +43,42 @@ document.addEventListener('DOMContentLoaded', () => {
   const shippingCostResult    = document.getElementById('shippingCostResult');
   const finalTotalPrice       = document.getElementById('finalTotalPrice');
 
-  // Diskuska za „sastrane” (razredi popusta)
   const addTierBtn    = document.getElementById('addTierBtn');
   const discountTable = document.getElementById('discountTable').getElementsByTagName('tbody')[0];
 
   let profitChart = null;
 
-  // ======= 3) Učitaj aparate iz Firestore i popuni <select> =======
+  // ======= 3) Funkcija za učitavanje aparata i popunjavanje <select> =======
   async function loadMachinesIntoSelect() {
     try {
       const snapshot = await db.collection('machines').orderBy('name').get();
+      if (snapshot.empty) {
+        console.warn('U Firestoreu nema nijednog dokumenta u kolekciji "machines".');
+      }
       snapshot.forEach(doc => {
         const m = doc.data();
         const option = document.createElement('option');
-        // Vrijednost opcije pohranjuje cijenu rada (cijenaRada)
+        // value = cijenaRada; tekst = ime aparata i cijena rada
         option.value = m.cijenaRada.toFixed(2);
         option.textContent = `${m.name} (€/sat: ${m.cijenaRada.toFixed(2)})`;
         machineSelect.appendChild(option);
       });
+      console.log('Opcije su napunjene u <select>:', machineSelect.options.length);
     } catch (err) {
-      console.error('Greška pri učitavanju aparata u select:', err);
+      console.error('Greška pri dohvaćanju aparata iz Firestorea:', err);
     }
   }
 
-  // Kad promijeniš odabir aparata, ponovno izračunamo ukupan trošak rada aparata po satu:
+  // Kad se promijeni izbor aparata, sumiraj cijenu rada
   machineSelect.addEventListener('change', () => {
-    // const selectedOptions = Array.from(machineSelect.selectedOptions);
-    // Zbroji vrijednost (cijenaRada) za sve odabrane opcije
     let totalMachineCost = 0;
     Array.from(machineSelect.selectedOptions).forEach(opt => {
       totalMachineCost += parseFloat(opt.value) || 0;
     });
-    // Postavi u polje (readonly) "machineCostPerHour"
     machineCostInput.value = totalMachineCost.toFixed(2);
   });
 
-  // ======= 4) Dodaj redak u tablicu razreda popusta =======
+  // ======= 4) Dodavanje i uklanjanje redova “razreda popusta” =======
   addTierBtn.addEventListener('click', () => {
     const newRow = discountTable.insertRow();
     newRow.innerHTML = `
@@ -88,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
       <td><input type="number" class="tier-percent" value="0" min="0" step="0.1" /></td>
       <td><button type="button" class="remove-tier">Ukloni</button></td>
     `;
-    // Dodaj event listener za dugme “Ukloni”
     newRow.querySelector('.remove-tier').addEventListener('click', () => {
       discountTable.removeChild(newRow);
     });
@@ -113,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
         tiers.push({ min: minVal, max: maxVal, pct: pctVal });
       }
     });
-    // Sortiraj po min vrijednosti
     tiers.sort((a, b) => a.min - b.min);
     return tiers;
   }
@@ -127,16 +124,16 @@ document.addEventListener('DOMContentLoaded', () => {
     return 0;
   }
 
-  // ======= 6) Submit forme — glavni izračun =======
+  // ======= 6) “Submit” forma – glavni izračun =======
   form.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    // 1) Pokupi sve unesene vrijednosti
+    // 1) Pokupi unesene vrijednosti
     const quantity             = parseInt(quantityInput.value) || 1;
     const weightGrams          = parseFloat(weightInput.value) || 0;
     const materialCostPerKg    = parseFloat(materialInput.value) || 0;
     const printTimeMin         = parseFloat(printTimeInput.value) || 0;
-    const machineCostPerHour   = parseFloat(machineCostInput.value) || 0; // sad dolazi iz selecta
+    const machineCostPerHour   = parseFloat(machineCostInput.value) || 0;
     const laborTimeMin         = parseFloat(laborTimeInput.value) || 0;
     const laborCostPerHour     = parseFloat(laborCostInput.value) || 0;
     const otherCostsPerUnit    = parseFloat(otherCostsInput.value) || 0;
@@ -157,23 +154,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const costPerUnitWithMargin =
       costPerUnitBeforeMargin * (1 + marginPercent / 100);
 
-    // 3) Ukupna cijena prije popusta (decimalna) – za kupca (s maržom)
+    // 3) Ukupna cijena prije popusta (za kupca, decimalna)
     const totalPriceBeforeDiscountDecimal = costPerUnitWithMargin * quantity;
 
-    // 4) Logika popusta na količinu prema razredima
-    const tiers              = getDiscountTiers();
-    const discountPctByQty   = computeQuantityDiscount(quantity, tiers);
-    const discountAmountDecimal = (totalPriceBeforeDiscountDecimal * discountPctByQty) / 100;
+    // 4) Popust na količinu prema razredima
+    const tiers                  = getDiscountTiers();
+    const discountPctByQty       = computeQuantityDiscount(quantity, tiers);
+    const discountAmountDecimal  = (totalPriceBeforeDiscountDecimal * discountPctByQty) / 100;
     const totalAfterDiscountValueDecimal =
       totalPriceBeforeDiscountDecimal - discountAmountDecimal;
 
-    // 5) Izračun ukupnog troška (bez slanja) i konačne cijene za kupca
-    // totalCostWithoutShipping: stvarni trošak proizvodnje (bez marže i slanja)
+    // 5) Ukupni trošak (bez slanja) i konačna cijena za kupca
     const totalCostWithoutShipping   = costPerUnitBeforeMargin * quantity;
-    // finalPriceDecimal: što kupac plaća (nakon popusta i sa slanjem za kupca)
     const finalPriceDecimal          = totalAfterDiscountValueDecimal + shippingCostForBuyer;
-
-    // Trošak s poštarinom (stvarni trošak + stvarni trošak slanja)
     const totalCostWithShipping      = totalCostWithoutShipping + actualShippingCost;
 
     // 6) Prikaz rezultata (decimalno)
@@ -208,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     resultBox.hidden = false;
 
-    // 7) Generiranje specifikacije za kupca
+    // 7) Specifikacija narudžbe za kupca
     const costPerUnitRounded           = Math.ceil(costPerUnitWithMargin);
     const totalBeforeDiscountRounded   = costPerUnitRounded * quantity;
     const discountAmountRounded        = Math.ceil((totalBeforeDiscountRounded * discountPctByQty) / 100);
@@ -384,8 +377,8 @@ document.addEventListener('DOMContentLoaded', () => {
           alert('Greška pri izradi slike za PDF. Provjeri konzolu.');
         });
     });
-  });
+  }); // === Kraj DOMContentLoaded callback ===
 
-  // ======= 3) Nakon definiranja svih funkcija, učitaj aparate u select =======
-  loadMachinesIntoSelect();
+  // ======= 3) POZIV IZVAN CALLBACKA VIŠE NIJE POTREBAN =======
+  // loadMachinesIntoSelect();  ←  Ovo više ne treba (i ne smije biti ovdje)
 });
